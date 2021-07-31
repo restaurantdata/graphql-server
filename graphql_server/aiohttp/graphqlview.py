@@ -227,7 +227,14 @@ class GraphQLView:
     @classmethod
     def attach(cls, app, *, route_path="/graphql", route_name="graphql", **kwargs):
         view = cls(**kwargs)
-        app.router.add_route("*", route_path, _asyncify(view), name=route_name)
+        for method in ('GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'):  # no OPTIONS
+            app.router.add_route(method, route_path, view, name=route_name)
+
+        # apparently this is just plain missing otherwise?
+        # no, I think the parent code should call attach a 2nd time to attach /graphiql
+        #if 'graphiql' in kwargs and kwargs['graphiql']:
+        #    for method in ('GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'):  # no OPTIONS
+        #        app.router.add_route(method, '/graphiql', view, name='graphiql')
 
 
 def _asyncify(handler):
